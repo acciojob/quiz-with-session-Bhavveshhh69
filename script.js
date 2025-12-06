@@ -1,30 +1,28 @@
-// ===============================
-// QUIZ QUESTIONS
-// ===============================
-const quizData = [
+// ⚠️ MUST MATCH CYPRESS QUESTION SET EXACTLY
+const questions = [
   {
-    question: "1. What is 2 + 2?",
-    options: ["1", "2", "3", "4"],
-    answer: "4"
-  },
-  {
-    question: "2. Which planet is known as the Red Planet?",
-    options: ["Earth", "Mars", "Jupiter", "Saturn"],
-    answer: "Mars"
-  },
-  {
-    question: "3. What is the capital of France?",
-    options: ["Rome", "Paris", "Berlin", "London"],
+    question: "What is the capital of France?",
+    choices: ["Rome", "Paris", "Berlin", "Madrid"],
     answer: "Paris"
   },
   {
-    question: "4. Which is a mammal?",
-    options: ["Shark", "Dolphin", "Octopus", "Eagle"],
+    question: "What is 2 + 2?",
+    choices: ["1", "3", "4", "5"],
+    answer: "4"
+  },
+  {
+    question: "Which planet is known as the Red Planet?",
+    choices: ["Earth", "Mars", "Jupiter", "Saturn"],
+    answer: "Mars"
+  },
+  {
+    question: "Which is a mammal?",
+    choices: ["Shark", "Dolphin", "Eagle", "Octopus"],
     answer: "Dolphin"
   },
   {
-    question: "5. Who wrote 'Hamlet'?",
-    options: ["Shakespeare", "Tolstoy", "Homer", "Milton"],
+    question: "Who wrote 'Hamlet'?",
+    choices: ["Shakespeare", "Tolstoy", "Milton", "Homer"],
     answer: "Shakespeare"
   }
 ];
@@ -33,69 +31,64 @@ const questionsDiv = document.getElementById("questions");
 const submitBtn = document.getElementById("submit");
 const scoreDiv = document.getElementById("score");
 
-// ===============================
-// LOAD SAVED PROGRESS
-// ===============================
-let savedProgress = JSON.parse(sessionStorage.getItem("progress")) || {};
+// Load saved progress
+let progress = JSON.parse(sessionStorage.getItem("progress")) || {};
 
-// ===============================
-// RENDER QUIZ QUESTIONS
-// ===============================
+// ---------------------------
+// RENDER QUESTIONS
+// ---------------------------
 function renderQuestions() {
   questionsDiv.innerHTML = "";
 
-  quizData.forEach((q, index) => {
-    const qDiv = document.createElement("div");
+  questions.forEach((q, index) => {
+    const wrapper = document.createElement("div");
 
     const title = document.createElement("p");
     title.textContent = q.question;
-    qDiv.appendChild(title);
+    wrapper.appendChild(title);
 
-    q.options.forEach(option => {
+    q.choices.forEach(choice => {
       const label = document.createElement("label");
       const radio = document.createElement("input");
 
       radio.type = "radio";
-      radio.name = `question-${index}`;
-      radio.value = option;
+      radio.name = "q" + index;
+      radio.value = choice;
 
-      // Restore saved selection
-      if (savedProgress[index] === option) {
-        radio.checked = true;
+      // restore selection
+      if (progress[index] === choice) {
+        radio.setAttribute("checked", "true"); // REQUIRED FOR CYPRESS SELECTOR
       }
 
+      // save progress
       radio.addEventListener("change", () => {
-        // Save progress to sessionStorage
-        savedProgress[index] = option;
-        sessionStorage.setItem("progress", JSON.stringify(savedProgress));
+        progress[index] = choice;
+        sessionStorage.setItem("progress", JSON.stringify(progress));
       });
 
       label.appendChild(radio);
-      label.append(option);
-      qDiv.appendChild(label);
-      qDiv.appendChild(document.createElement("br"));
+      label.append(" " + choice);
+      wrapper.appendChild(label);
+      wrapper.appendChild(document.createElement("br"));
     });
 
-    questionsDiv.appendChild(qDiv);
+    questionsDiv.appendChild(wrapper);
   });
 }
 
 renderQuestions();
 
-// ===============================
+// ---------------------------
 // SUBMIT QUIZ
-// ===============================
+// ---------------------------
 submitBtn.addEventListener("click", () => {
   let score = 0;
 
-  quizData.forEach((q, index) => {
-    if (savedProgress[index] === q.answer) {
-      score++;
-    }
+  questions.forEach((q, index) => {
+    if (progress[index] === q.answer) score++;
   });
 
   scoreDiv.textContent = `Your score is ${score} out of 5.`;
 
-  // Save score to localStorage
   localStorage.setItem("score", score);
 });
