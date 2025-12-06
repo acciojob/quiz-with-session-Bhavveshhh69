@@ -1,56 +1,101 @@
-//your JS code here.
-
-// Do not change code below this line
-// This code will just display the questions to the screen
-const questions = [
+// ===============================
+// QUIZ QUESTIONS
+// ===============================
+const quizData = [
   {
-    question: "What is the capital of France?",
-    choices: ["Paris", "London", "Berlin", "Madrid"],
-    answer: "Paris",
+    question: "1. What is 2 + 2?",
+    options: ["1", "2", "3", "4"],
+    answer: "4"
   },
   {
-    question: "What is the highest mountain in the world?",
-    choices: ["Everest", "Kilimanjaro", "Denali", "Matterhorn"],
-    answer: "Everest",
+    question: "2. Which planet is known as the Red Planet?",
+    options: ["Earth", "Mars", "Jupiter", "Saturn"],
+    answer: "Mars"
   },
   {
-    question: "What is the largest country by area?",
-    choices: ["Russia", "China", "Canada", "United States"],
-    answer: "Russia",
+    question: "3. What is the capital of France?",
+    options: ["Rome", "Paris", "Berlin", "London"],
+    answer: "Paris"
   },
   {
-    question: "Which is the largest planet in our solar system?",
-    choices: ["Earth", "Jupiter", "Mars"],
-    answer: "Jupiter",
+    question: "4. Which is a mammal?",
+    options: ["Shark", "Dolphin", "Octopus", "Eagle"],
+    answer: "Dolphin"
   },
   {
-    question: "What is the capital of Canada?",
-    choices: ["Toronto", "Montreal", "Vancouver", "Ottawa"],
-    answer: "Ottawa",
-  },
+    question: "5. Who wrote 'Hamlet'?",
+    options: ["Shakespeare", "Tolstoy", "Homer", "Milton"],
+    answer: "Shakespeare"
+  }
 ];
 
-// Display the quiz questions and choices
+const questionsDiv = document.getElementById("questions");
+const submitBtn = document.getElementById("submit");
+const scoreDiv = document.getElementById("score");
+
+// ===============================
+// LOAD SAVED PROGRESS
+// ===============================
+let savedProgress = JSON.parse(sessionStorage.getItem("progress")) || {};
+
+// ===============================
+// RENDER QUIZ QUESTIONS
+// ===============================
 function renderQuestions() {
-  for (let i = 0; i < questions.length; i++) {
-    const question = questions[i];
-    const questionElement = document.createElement("div");
-    const questionText = document.createTextNode(question.question);
-    questionElement.appendChild(questionText);
-    for (let j = 0; j < question.choices.length; j++) {
-      const choice = question.choices[j];
-      const choiceElement = document.createElement("input");
-      choiceElement.setAttribute("type", "radio");
-      choiceElement.setAttribute("name", `question-${i}`);
-      choiceElement.setAttribute("value", choice);
-      if (userAnswers[i] === choice) {
-        choiceElement.setAttribute("checked", true);
+  questionsDiv.innerHTML = "";
+
+  quizData.forEach((q, index) => {
+    const qDiv = document.createElement("div");
+
+    const title = document.createElement("p");
+    title.textContent = q.question;
+    qDiv.appendChild(title);
+
+    q.options.forEach(option => {
+      const label = document.createElement("label");
+      const radio = document.createElement("input");
+
+      radio.type = "radio";
+      radio.name = `question-${index}`;
+      radio.value = option;
+
+      // Restore saved selection
+      if (savedProgress[index] === option) {
+        radio.checked = true;
       }
-      const choiceText = document.createTextNode(choice);
-      questionElement.appendChild(choiceElement);
-      questionElement.appendChild(choiceText);
-    }
-    questionsElement.appendChild(questionElement);
-  }
+
+      radio.addEventListener("change", () => {
+        // Save progress to sessionStorage
+        savedProgress[index] = option;
+        sessionStorage.setItem("progress", JSON.stringify(savedProgress));
+      });
+
+      label.appendChild(radio);
+      label.append(option);
+      qDiv.appendChild(label);
+      qDiv.appendChild(document.createElement("br"));
+    });
+
+    questionsDiv.appendChild(qDiv);
+  });
 }
+
 renderQuestions();
+
+// ===============================
+// SUBMIT QUIZ
+// ===============================
+submitBtn.addEventListener("click", () => {
+  let score = 0;
+
+  quizData.forEach((q, index) => {
+    if (savedProgress[index] === q.answer) {
+      score++;
+    }
+  });
+
+  scoreDiv.textContent = `Your score is ${score} out of 5.`;
+
+  // Save score to localStorage
+  localStorage.setItem("score", score);
+});
